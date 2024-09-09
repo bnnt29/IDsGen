@@ -18,7 +18,7 @@ typedef struct group {
 
 int main(int argc, char const *argv[]) {
 
-  //printf("-4");
+  // printf("-4");
   if (argc < 2) {
     printf("/\n");
     return 0;
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
   group *groups = (group *)malloc(sizeof(group) * 256);
   int group_count = 0;
 
-  //printf("-3");
+  // printf("-3");
   while (fgets(group_line, sizeof(group_line) / sizeof(char), file)) {
 
     // printf("##%s", line);
@@ -68,17 +68,17 @@ int main(int argc, char const *argv[]) {
   }
 
   fclose(file);
-  if (argc < 5) {
+  if (argc < 6) {
     printf("/\n");
     return 0;
   }
   if (strcmp(argv[3], argv[4]) == 0 || strcmp(argv[4], argv[5]) == 0 ||
-      strcmp(argv[3], argv[5]) == 0 || group_count == 0) {
+      strcmp(argv[3], argv[5]) == 0 || strcmp(argv[3], argv[6])== 0 || strcmp(argv[4], argv[6])== 0 || strcmp(argv[5], argv[6])== 0 || group_count == 0) {
     printf("/\n");
     return 0;
   }
 
-  //printf("-2");
+  // printf("-2");
   char *filepath = (char *)malloc((strlen(argv[2]) + 3) * sizeof(char));
   strcpy(filepath, "");
   strcat(filepath, "./");
@@ -92,17 +92,22 @@ int main(int argc, char const *argv[]) {
   free(filepath);
   char line[256 * 4];
   fgets(line, sizeof(line) / sizeof(char), file2);
-  int key_index[3]; // 1. role, 2. prename, 3. aftername
+  int key_index[4]; // 1. role, 2. prename, 3. aftername, 4. foto
   key_index[0] = 0;
   key_index[1] = 0;
   key_index[2] = 0;
-  //printf("-1");
-  for (int i = 3; i < 6; i++) {
-
+  key_index[3] = 0;
+  // printf("-1");
+  for (int i = 3; i < 7; i++) {
     char *b = strstr(line, argv[i]);
-
-    int e = b - line;
-
+    int e = 0;
+    if (b != NULL)                     /* strstr returns NULL if item not found */
+    {
+      e = b - line;
+    }else{
+      printf("/\n");
+      return 0;
+    }
     if (e < 0 || e > (int)strlen(line)) {
       printf("/\n");
       return 0;
@@ -115,7 +120,7 @@ int main(int argc, char const *argv[]) {
     }
   }
 
-  //printf("0\n");
+  // printf("0\n");
   group last;
   last.name = "Role not found";
   last.color_r = 0;
@@ -137,7 +142,7 @@ int main(int argc, char const *argv[]) {
       args[argsc++] = token;
       token = strtok(NULL, ";,");
     } while (args[argsc - 1] != NULL);
-    if (argsc < key_index[0] || argsc < key_index[1] || argsc < key_index[2]) {
+    if (argsc < key_index[0] || argsc < key_index[1] || argsc < key_index[2] || argsc < key_index[3]) {
       printf("/\n");
       return 0;
     }
@@ -179,6 +184,14 @@ int main(int argc, char const *argv[]) {
       aftername = args[key_index[2]];
       aftername = strtok(aftername, " \n\r\";");
       printf("%s\n", aftername);
+    }
+    if (strcmp(args[key_index[3]], "") == 0) {
+      printf("\n");
+    } else {
+      char *foto = malloc(256 * sizeof(char));
+      foto = args[key_index[3]];
+      foto = strtok(foto, " \n\r\";");
+      printf("%s\n", foto);
     }
   }
   /*for (int i = 0; i < group_count; i++) {
