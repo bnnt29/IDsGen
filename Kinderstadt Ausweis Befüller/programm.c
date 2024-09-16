@@ -67,7 +67,7 @@ void draw_image(HPDF_Doc pdf, const HPDF_Image image, float x, float y, float sc
                       HPDF_Image_GetHeight(image) / scale);
 }
 
-void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y) {
+void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y, float scale) {
 #ifdef __WIN32__
   const char *FILE_SEPARATOR = "\\";
 #else
@@ -85,12 +85,12 @@ void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y) {
   image = HPDF_LoadJpegImageFromFile(pdf, filename1);
 
   /* Draw image to the canvas. */
-  draw_image(pdf, image, x, y, 2.8);
+  draw_image(pdf, image, x, y, scale);
 
   free(filename1);
 }
 
-void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y) {
+void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y, float scale) {
 #ifdef __WIN32__
   const char *FILE_SEPARATOR = "\\";
 #else
@@ -108,7 +108,7 @@ void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y) {
   image = HPDF_LoadPngImageFromFile(pdf, filename1);
 
   /* Draw image to the canvas. */
-  draw_image(pdf, image, x, y, 18);
+  draw_image(pdf, image, x, y, scale);
 
   free(filename1);
 }
@@ -173,7 +173,76 @@ char *splitstr(int x, const char *txt, bool first) {
   }
 }
 
-void drawIdentity(int x, char *name, char *add_name, const bool foto, const char *group,
+void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height, int x){
+/* Draw Image */
+
+  switch (x%9) {
+  case 0:
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3, posy, 2.8);
+    drawjpg_image(pdf, "resources/Bild2.jpg", posx + width - 93, posy, 2.8);
+  break;
+  case 1:
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3+7, posy, 2.8);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Rakete.png", posx + width - 75, posy+10, 5.5);
+  break;
+  case 2:
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 7, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 4, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 3, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 2.5, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 2, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.7, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.4, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.2, posy, 45);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Rakete.png", posx + width - 75, posy+20, 6);
+  break;
+  case 3:
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 7, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 4, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 3, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 2.5, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 2, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.7, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.4, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.2, posy, 45);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Stadt.png", posx + width - 90, posy+30, 3.5);
+    break;
+    case 4:
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 7, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 4, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 3, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 2.5, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 2, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.7, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.4, posy, 45);
+    drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.2, posy, 45);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Auto.png", posx + width - 90, posy+38, 6.5);
+    break;
+  case 5:
+    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Rakete.png", posx + width - 75, posy, 5);
+  break;
+  case 6:
+    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Astronaut1.png", posx + width - 105, posy+5, 5.8);
+  break;
+  case 7:
+    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Astronaut2.png", posx + width - 90, posy+20, 4);
+  break;
+  case 8:
+    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Auto.png", posx + width - 90, posy+38, 6.5);
+  break;
+  }
+}
+
+void drawIdentity(int x, char *name, char *add_name, const int foto, const char *group,
                   HPDF_Page page, HPDF_Font font, HPDF_Font fontbd,
                   HPDF_Doc pdf, double *color) {
   //bool aftername = strcmp(add_name, "") == 0;
@@ -214,6 +283,8 @@ void drawIdentity(int x, char *name, char *add_name, const bool foto, const char
 
   HPDF_Page_SetLineWidth(page, 0);
 
+  drawImages(pdf, posx, posy, width, height, x);
+
   /* Draw Rectangle */
   HPDF_Page_SetLineWidth(page, 0);
   HPDF_Page_SetRGBStroke(page, 0, 0, 0);
@@ -225,13 +296,18 @@ void drawIdentity(int x, char *name, char *add_name, const bool foto, const char
   draw_rect(page, posx, posy + height - groupspace, width, groupspace);
   HPDF_Page_FillStroke(page);
 
-  /* Draw Image */
-
-  drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy);
-  drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3, posy);
-  drawjpg_image(pdf, "resources/Bild2.jpg", posx + width - 93, posy);
-
-  drawpng_image(pdf, (foto)?"resources/FotoJa.png":"resources/FotoNein.png", posx+width-34, posy+height-34);
+  /*Draw Foto image*/
+  switch(foto){
+    case 0:
+      drawpng_image(pdf, "resources/FotoNein.png", posx+width-34, posy+height-34, 18);
+      break;
+    case 1:
+      drawpng_image(pdf, "resources/FotoJa.png", posx+width-34, posy+height-34, 18);
+      break;
+    case 2:
+      drawpng_image(pdf, "resources/FotoMono.png", posx+width-34, posy+height-34, 18);
+      break;
+  }
 
   /*Text*/
   if (strcmp(name, "\0") == 0) {
@@ -255,6 +331,11 @@ void drawIdentity(int x, char *name, char *add_name, const bool foto, const char
   //int maxlineexpand = 4;
   int yoffset1line = (height - groupspace) / 2 + lettersize * 2;
   int yoffset2line = (height - groupspace) / 5;
+  if(x%9>4){
+    HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
+  }else{
+    HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
+  }
   text(page, posx + lettersize * 2, posy + yoffset1line * 1.05, name);
   HPDF_Page_SetFontAndSize(page, fontbd, 18);
   if (strlen(add_name) > 20) {
@@ -373,9 +454,14 @@ int main(int argc, char const *argv[])  {
     if (strstr(foto, "\0") == NULL || strcmp(foto, "") != 0) {
       foto[strlen(foto) - 1] = '\0';
     }
-    bool want_foto = false;
+    int want_foto = 0;
     if(foto[0] == '1'|| foto[0] == 'J' || foto[0] == 'j'|| foto[0] == 'Y' || foto[0] == 'y'|| foto[0] == 'T' || foto[0] == 't') {
-      want_foto = true;
+      want_foto = 1;
+    }else
+    if(foto[0] == '0'|| foto[0] == '2'|| foto[0] == 'N' || foto[0] == 'n'|| foto[0] == 'F' || foto[0] == 'f') {
+      want_foto = 0;
+    }else{
+      want_foto = 2;
     }
     printf("%d. Name: %s %s aus %s\n", x, line, aftername, group_name);
     drawIdentity(x++ % ids_per_page, line, aftername, want_foto, group_name, page, font,
@@ -386,7 +472,7 @@ int main(int argc, char const *argv[])  {
   }
   for (int z = 0; z < min_fill_templates; z++) {
     // printf("Name: %s", line);
-    drawIdentity(x++ % ids_per_page, "\0", "\0", false, group_name, page, font,
+    drawIdentity(x++ % ids_per_page, "\0", "\0", 2, group_name, page, font,
                  font_bold, pdf, color);
     if (x % ids_per_page == 0 && z < min_fill_templates - 1) {
       page = HPDF_AddPage(pdf);
