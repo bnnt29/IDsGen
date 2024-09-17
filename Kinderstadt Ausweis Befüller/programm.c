@@ -176,10 +176,10 @@ char *splitstr(int x, const char *txt, bool first) {
 void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height, int x){
 /* Draw Image */
 
-  switch (x%9) {
+  switch (x%11) {
   case 0:
     drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
-    drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3, posy, 2.8);
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3+7, posy, 2.8);
     drawjpg_image(pdf, "resources/Bild2.jpg", posx + width - 93, posy, 2.8);
   break;
   case 1:
@@ -223,19 +223,28 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height, i
     drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx + width / 1.2, posy, 45);
     drawpng_image(pdf, "resources/Zukunftsstadt/Auto.png", posx + width - 90, posy+38, 6.5);
     break;
-  case 5:
-    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
-    drawpng_image(pdf, "resources/Zukunftsstadt/Rakete.png", posx + width - 75, posy, 5);
+    case 5:
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
+    drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3+7, posy, 2.8);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Einhorn.png", posx + width - 90, posy+20, 6);
   break;
   case 6:
     drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
-    drawpng_image(pdf, "resources/Zukunftsstadt/Astronaut1.png", posx + width - 105, posy+5, 5.8);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Rakete.png", posx + width - 75, posy+5, 5);
   break;
   case 7:
     drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
-    drawpng_image(pdf, "resources/Zukunftsstadt/Astronaut2.png", posx + width - 90, posy+20, 4);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Einhorn.png", posx + width - 90, posy+20, 6);
   break;
   case 8:
+    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Astronaut1.png", posx + width - 105, posy+5, 5.8);
+  break;
+  case 9:
+    drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
+    drawpng_image(pdf, "resources/Zukunftsstadt/Astronaut2.png", posx + width - 90, posy+20, 4);
+  break;
+  case 10:
     drawjpg_image(pdf, "resources//Zukunftsstadt/Weltall.jpg", posx, posy, 7.238);
     drawpng_image(pdf, "resources/Zukunftsstadt/Auto.png", posx + width - 90, posy+38, 6.5);
   break;
@@ -331,7 +340,7 @@ void drawIdentity(int x, char *name, char *add_name, const int foto, const char 
   //int maxlineexpand = 4;
   int yoffset1line = (height - groupspace) / 2 + lettersize * 2;
   int yoffset2line = (height - groupspace) / 5;
-  if(x%9>4){
+  if(x%11>5){
     HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
   }else{
     HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
