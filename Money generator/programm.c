@@ -175,9 +175,32 @@ char *splitstr(int x, const char *txt, bool first) {
   }
 }
 
-void drawImages(HPDF_Doc pdf, int posx, int posy) {
+void drawImages(HPDF_Doc pdf, int posx, int posy, int width, int height,
+                int value) {
   /* Draw Image */
-  drawpng_image(pdf, "resources/Kröten.png", posx + 10, posy + 30, 2.5);
+  switch (value) {
+  case 1:
+    drawpng_image(pdf, "resources/Auto.png", posx + 4, posy + 30, 7.5);
+    drawpng_image(pdf, "resources/Auto.png", posx + width - 75, posy + 30, 7.5);
+    break;
+  case 2:
+    drawpng_image(pdf, "resources/Rakete.png", posx + 10, posy + 15, 7);
+    drawpng_image(pdf, "resources/Rakete.png", posx + width - 60, posy + 15, 7);
+    break;
+  case 5:
+    drawpng_image(pdf, "resources/Astronaut2.png", posx + 5, posy + 30, 5);
+    drawpng_image(pdf, "resources/Astronaut2.png", posx + width - 70, posy + 30,
+                  5);
+    break;
+  case 10:
+    drawpng_image(pdf, "resources/Einhorn.png", posx + 5, posy + 25, 8);
+    drawpng_image(pdf, "resources/Einhorn.png", posx + width - 65, posy + 25,
+                  8);
+    break;
+  default:
+    drawpng_image(pdf, "resources/Kröten.png", posx + 10, posy + 30, 2.5);
+    break;
+  }
 }
 
 void drawmoney(int x, char *name, int value, HPDF_Page page, HPDF_Font font,
@@ -225,17 +248,34 @@ void drawmoney(int x, char *name, int value, HPDF_Page page, HPDF_Font font,
   draw_rect(page, posx, posy, width, height);
   HPDF_Page_Stroke(page);
 
-  drawImages(pdf, posx, posy);
+  drawImages(pdf, posx, posy, width, height, value);
 
   /*Text*/
-  HPDF_Page_SetFontAndSize(page, fontbd, 20);
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
+  char *valbuf = (char *)malloc(10 * sizeof(char));
+  sprintf(valbuf, "%d", value);
+  switch (value) {
+  case 1:
+  case 2:
+  case 5:
+  case 10:
+    HPDF_Page_SetFontAndSize(page, fontbd, 30);
+    text(page, posx + width / 2 - lettersize * 1.7,
+         posy + width / 2 - lettersize * 5, valbuf);
+    HPDF_Page_SetFontAndSize(page, fontbd, 20);
+    text(page,
+         posx + width / 2 - lettersize * ((sizeof(name) / sizeof(char)) * 0.65),
+         posy + lettersize * 4, name);
+    break;
+  default:
+    HPDF_Page_SetFontAndSize(page, fontbd, 20);
+    char *value_str = (char *)malloc(10 * sizeof(char));
+    sprintf(value_str, "%d %s", value, name);
 
-  char *value_str = (char *)malloc(10 * sizeof(char));
-  sprintf(value_str, "%d %s", value, name);
-
-  text(page, posx + width / 2 - lettersize * sizeof(value_str) / sizeof(char),
-       posy + lettersize * 2, value_str);
+    text(page, posx + width / 2 - lettersize * sizeof(value_str) / sizeof(char),
+         posy + lettersize * 2, value_str);
+    break;
+  }
 }
 
 int main(int argc, char const *argv[]) {
