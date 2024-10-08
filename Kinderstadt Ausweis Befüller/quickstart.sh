@@ -16,6 +16,6 @@ echo "Lastname key: Nachname"
 
 echo "Foto key: Foto"
 
-./pipe_inputer_dualkey.run roles.txt Teilnehmer2023.csv Rolle Vorname Name Foto | ./programm.run out 1
+./pipe_inputer_dualkey.run roles.txt Teilnehmer2024.csv Rolle Vorname Name Extra | ./programm.run out 1
 
 make clean
