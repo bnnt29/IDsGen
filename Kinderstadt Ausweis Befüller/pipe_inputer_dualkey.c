@@ -92,7 +92,7 @@ int main(int argc, char const *argv[]) {
   free(filepath);
   char line[256 * 4];
   fgets(line, sizeof(line) / sizeof(char), file2);
-  int key_index[4]; // 1. role, 2. prename, 3. aftername, 4. foto
+  int key_index[4]; // 1. role, 2. prename, 3. aftername, 4. extra
   key_index[0] = 0;
   key_index[1] = 0;
   key_index[2] = 0;
@@ -131,21 +131,26 @@ int main(int argc, char const *argv[]) {
   while (fgets(line, sizeof(line) / sizeof(char), file2)) {
     char **args = (char **)malloc(256 * 8 * sizeof(char *));
     int argsc = 0;
+    int argcount = 0;
     if (line[argsc] == ';') {
       args[argsc++] = "";
+      argcount++;
     }
     if (line[argsc] == ';') {
       args[argsc++] = "";
+      argcount++;
     }
     char *token = strtok(line, ";,");
     do {
       args[argsc++] = token;
       token = strtok(NULL, ";,");
+      argcount++;
     } while (args[argsc - 1] != NULL);
     if (argsc < key_index[0] || argsc < key_index[1] || argsc < key_index[2] || argsc < key_index[3]) {
       printf("/\n");
       return 0;
     }
+    argcount--;
     char *role = malloc(256 * sizeof(char));
     role = args[key_index[0]];
     role = strtok(role, " \n\r\";");
@@ -185,6 +190,10 @@ int main(int argc, char const *argv[]) {
       aftername = strtok(aftername, " \n\r\";");
       printf("%s\n", aftername);
     }
+    if(argcount < 4){
+      printf("\n");
+      continue;
+    }
     if (strcmp(args[key_index[3]], "") == 0) {
       printf("\n");
     } else {
@@ -193,6 +202,7 @@ int main(int argc, char const *argv[]) {
       foto = strtok(foto, " \n\r\";");
       printf("%s\n", foto);
     }
+    free(args);
   }
   /*for (int i = 0; i < group_count; i++) {
     free(groups[i].name);
