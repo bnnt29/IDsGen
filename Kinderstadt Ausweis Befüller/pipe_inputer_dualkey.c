@@ -17,7 +17,6 @@ typedef struct group {
 } group;
 
 int main(int argc, char const *argv[]) {
-
   // printf("-4");
   if (argc < 2) {
     printf("/\n");
@@ -73,7 +72,9 @@ int main(int argc, char const *argv[]) {
     return 0;
   }
   if (strcmp(argv[3], argv[4]) == 0 || strcmp(argv[4], argv[5]) == 0 ||
-      strcmp(argv[3], argv[5]) == 0 || strcmp(argv[3], argv[6])== 0 || strcmp(argv[4], argv[6])== 0 || strcmp(argv[5], argv[6])== 0 || group_count == 0) {
+      strcmp(argv[3], argv[5]) == 0 || strcmp(argv[3], argv[6]) == 0 ||
+      strcmp(argv[4], argv[6]) == 0 || strcmp(argv[5], argv[6]) == 0 ||
+      group_count == 0) {
     printf("/\n");
     return 0;
   }
@@ -90,8 +91,8 @@ int main(int argc, char const *argv[]) {
     return 0;
   }
   free(filepath);
-  char line[256 * 4];
-  fgets(line, sizeof(line) / sizeof(char), file2);
+  char *line = (char *)malloc(256 * 4 * sizeof(char));
+  fgets(line, 256 * 4, file2);
   int key_index[4]; // 1. role, 2. prename, 3. aftername, 4. extra
   key_index[0] = 0;
   key_index[1] = 0;
@@ -101,10 +102,10 @@ int main(int argc, char const *argv[]) {
   for (int i = 3; i < 7; i++) {
     char *b = strstr(line, argv[i]);
     int e = 0;
-    if (b != NULL)                     /* strstr returns NULL if item not found */
+    if (b != NULL) /* strstr returns NULL if item not found */
     {
       e = b - line;
-    }else{
+    } else {
       printf("/\n");
       return 0;
     }
@@ -119,7 +120,6 @@ int main(int argc, char const *argv[]) {
       }
     }
   }
-
   // printf("0\n");
   group last;
   last.name = "Role not found";
@@ -128,32 +128,29 @@ int main(int argc, char const *argv[]) {
   last.color_b = 0;
   groups[group_count] = last;
   group_count++;
-  while (fgets(line, sizeof(line) / sizeof(char), file2)) {
-    char **args = (char **)malloc(256 * 8 * sizeof(char *));
+  char *start = line;
+  while (fgets(line, 256 * 4, file2)) {
+    char **args = (char **)malloc(5 * sizeof(char *));
     int argsc = 0;
     int argcount = 0;
-    if (line[argsc] == ';') {
-      args[argsc++] = "";
-      argcount++;
-    }
-    if (line[argsc] == ';') {
-      args[argsc++] = "";
-      argcount++;
-    }
-    char *token = strtok(line, ";,");
+    char **line2 = (char **)malloc(sizeof(char *));
+    line2 = (char **)&line;
+    char *token = strsep(line2, ";");
     do {
       args[argsc++] = token;
-      token = strtok(NULL, ";,");
+      token = strsep(line2, ";");
       argcount++;
     } while (args[argsc - 1] != NULL);
-    if (argsc < key_index[0] || argsc < key_index[1] || argsc < key_index[2] || argsc < key_index[3]) {
+
+    if (argsc < key_index[0] || argsc < key_index[1] || argsc < key_index[2] ||
+        argsc < key_index[3]) {
       printf("/\n");
       return 0;
     }
     argcount--;
     char *role = malloc(256 * sizeof(char));
-    role = args[key_index[0]];
-    role = strtok(role, " \n\r\";");
+    memcpy(role, args[key_index[0]], 256);
+    role = strsep(&role, " \n\r\";");
     bool found = false;
     if (strcmp(last.name, role) == 0) {
       found = true;
@@ -178,19 +175,22 @@ int main(int argc, char const *argv[]) {
       printf("\n");
     } else {
       char *prename = malloc(256 * sizeof(char));
-      prename = args[key_index[1]];
-      prename = strtok(prename, " \n\r\";");
+      memcpy(prename, args[key_index[1]], 256);
+      prename = strsep(&prename, " \n\r\";");
       printf("%s\n", prename);
+      free(prename);
     }
     if (strcmp(args[key_index[2]], "") == 0) {
       printf("\n");
     } else {
       char *aftername = malloc(256 * sizeof(char));
-      aftername = args[key_index[2]];
-      aftername = strtok(aftername, " \n\r\";");
+      memcpy(aftername, args[key_index[2]], 256);
+      aftername = strsep(&aftername, " \n\r\";");
       printf("%s\n", aftername);
+      free(aftername);
     }
-    if(argcount < 4){
+    if (argcount < 4) {
+      line = start;
       printf("\n");
       continue;
     }
@@ -198,12 +198,18 @@ int main(int argc, char const *argv[]) {
       printf("\n");
     } else {
       char *foto = malloc(256 * sizeof(char));
-      foto = args[key_index[3]];
-      foto = strtok(foto, " \n\r\";");
+      memcpy(foto, args[key_index[3]], 256);
+      foto = strsep(&foto, " \n\r\";");
       printf("%s\n", foto);
+      free(foto);
     }
-    free(args);
+    // free(args);
+    // free(line);
+    free(role);
+    line = start;
+    // char *line = (char *)malloc(256 * 4 * sizeof(char));
   }
+  free(line);
   /*for (int i = 0; i < group_count; i++) {
     free(groups[i].name);
   }
