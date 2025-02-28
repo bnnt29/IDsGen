@@ -4,7 +4,7 @@ make
 
 echo "Roles: roles.txt"
 
-echo "Input: Teilnehmer2023.csv"
+echo "Input: Teilnehmer2024.csv"
 
 echo "Out: out.pdf"
 

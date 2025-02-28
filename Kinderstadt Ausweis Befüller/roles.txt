@@ -2,7 +2,7 @@
 235
 0.0
 0.0
-#Bürger
+#Zeitretter
 87
 153
 36
