@@ -223,8 +223,10 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
   /* Draw Image */
   switch (extra) {
   case 0:
-    drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 55,
-                  posy + 10, 10);
+    drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 60,
+                  posy + 30, 9);
+    drawpng_image(pdf, "resources/Boysnight/zahn.png", posx + width - 140,
+                    posy + 75, 12);
     break;
   case 1:
 
@@ -310,7 +312,11 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   draw_rect(page, posx, posy, width, height);
   HPDF_Page_Stroke(page);
 
-  draw_rect(page, posx, posy + height - groupspace, width, groupspace);
+  draw_rect(page, posx, posy, width, groupspace);
+  HPDF_Page_FillStroke(page);
+
+  HPDF_Page_SetRGBFill(page, 0, 0, 0);
+  HPDF_Page_Circle(page, posx + width / 2, posy + height - 10, 2);
   HPDF_Page_FillStroke(page);
   bool foto = false;
   switch (extra[0]) {
@@ -319,7 +325,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   default:
     foto = true;
     drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34,
-                  posy + height - 30, 18);
+                  posy-2, 18);
     break;
   }
 
@@ -329,7 +335,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
     HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
     printf("Group: %s\n", group);
     text(page, posx + width / 2 - sizeof(group) * lettersize,
-         posy + height - 11, group);
+         posy + 15, group);
     return;
   }
   HPDF_Page_SetFontAndSize(page, fontbd, 80/idsperline);
@@ -349,7 +355,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
 
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
 
-  text(page, posx + lettersize * 2, posy + yoffset1line * 1.05, name);
+  text(page, posx + lettersize * 2, posy + yoffset1line * 1.32, name);
   HPDF_Page_SetFontAndSize(page, fontbd, 36/idsperline);
   if (strlen(add_name) > 20) {
     HPDF_Page_SetFontAndSize(page, fontbd, 32/idsperline);
@@ -357,11 +363,11 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   if (strlen(add_name) > 28) {
     HPDF_Page_SetFontAndSize(page, fontbd, 24/idsperline);
   }
-  text(page, posx + lettersize * 2, posy + yoffset1line - yoffset2line,
+  text(page, posx + lettersize * 2, posy + yoffset1line + yoffset2line - 18,
        add_name);
   HPDF_Page_SetFontAndSize(page, fontbd, 24);
   HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
-  text(page, posx + width / 2 - sizeof(group) * lettersize, posy + height - 11,
+  text(page, posx + width / 2 - sizeof(group) * lettersize, posy + 15,
        group);
 }
 
