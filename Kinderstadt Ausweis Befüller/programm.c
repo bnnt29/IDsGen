@@ -21,8 +21,8 @@ wchar_t OE = L'\u00d6';
 wchar_t AE = L'\u00c4';
 
 const bool FILL_REMAINING_PAGE = true;
-const int ids_per_page = 10;
-const int min_fill_templates = 15;
+const int ids_per_page = 21;
+const int min_fill_templates = 5;
 
 void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no,
                    void *user_data) {
@@ -67,6 +67,13 @@ void draw_image(HPDF_Doc pdf, const HPDF_Image image, float x, float y,
                       HPDF_Image_GetHeight(image) / scale);
 }
 
+typedef struct Image {
+  char *filename;
+  HPDF_Image image;
+} Image;
+int imagecount = 0;
+Image **images = NULL;
+
 void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y,
                    float scale) {
 #ifdef __WIN32__
@@ -76,14 +83,34 @@ void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y,
 #endif
   char *filename1 = malloc((strlen(filename) + 4) * sizeof(char));
 
-  HPDF_Image image;
+  HPDF_Image image = NULL;
 
   strcpy(filename1, "");
   strcat(filename1, FILE_SEPARATOR);
   strcat(filename1, filename);
   strcat(filename1, "\0");
-
-  image = HPDF_LoadJpegImageFromFile(pdf, filename1);
+  bool found = false;
+  for (int i = 0; i < imagecount; i++) {
+    if (strcmp(images[i]->filename, filename1) == 0) {
+      image = images[i]->image;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    image = HPDF_LoadJpegImageFromFile(pdf, filename1);
+    images = (Image **)realloc(images, imagecount + sizeof(Image*));
+    Image *im = malloc(sizeof(Image));
+    im -> filename = malloc((strlen(filename1) + 1) * sizeof(char));
+    strcpy(im -> filename, filename1);
+    im -> image = image;
+    images[imagecount] = im;
+    imagecount++;
+  }
+  if (image == NULL) {
+    printf("Error loading image %s\n", filename1);
+    return;
+  }
 
   /* Draw image to the canvas. */
   draw_image(pdf, image, x, y, scale);
@@ -100,14 +127,30 @@ void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y,
 #endif
   char *filename1 = malloc((strlen(filename) + 4) * sizeof(char));
 
-  HPDF_Image image;
+  HPDF_Image image = NULL;
 
   strcpy(filename1, "");
   strcat(filename1, FILE_SEPARATOR);
   strcat(filename1, filename);
   strcat(filename1, "\0");
-
-  image = HPDF_LoadPngImageFromFile(pdf, filename1);
+  bool found = false;
+  for (int i = 0; i < imagecount; i++) {
+    if (strcmp(images[i]->filename, filename1) == 0) {
+      image = images[i]->image;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    image = HPDF_LoadPngImageFromFile(pdf, filename1);
+    images = (Image **)realloc(images, imagecount + sizeof(Image*));
+    Image *im = malloc(sizeof(Image));
+    im -> filename = malloc((strlen(filename1) + 1) * sizeof(char));
+    strcpy(im -> filename, filename1);
+    im -> image = image;
+    images[imagecount] = im;
+    imagecount++;
+  }
 
   /* Draw image to the canvas. */
   draw_image(pdf, image, x, y, scale);
@@ -179,6 +222,10 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
                 int x, const int extra) {
   /* Draw Image */
   switch (extra) {
+  case 0:
+    drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 55,
+                  posy + 10, 10);
+    break;
   case 1:
 
     drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
@@ -220,17 +267,17 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   int pageWidth = HPDF_Page_GetWidth(page);
   double xwidth = 8.5;
   double xtoy = 5.2 / xwidth;
-  int idsperline = 2;
+  int idsperline = 3;
   int idsperrow = ids_per_page / idsperline;
-  double width = 267;
+  double width = 534/idsperline;
   double lettersize = 6;
   double min_space = 11;
-  double min_inner_space = 2;
+  double min_inner_space = 4/idsperline;
   double height = width * xtoy;
   double groupspace_xtoy = 1.2 / xwidth;
   double groupspace = width * groupspace_xtoy;
   double outer_space_X = (pageWidth - (width * idsperline)) / (idsperline + 1);
-  double inner_space_X = outer_space_X / 2;
+  double inner_space_X = outer_space_X / idsperline;
   inner_space_X =
       (inner_space_X < min_inner_space) ? min_inner_space : inner_space_X;
   outer_space_X =
@@ -245,13 +292,14 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
       ((pageHeight - (height * idsperrow)) - (idsperrow - 1) * inner_space_Y) /
       2;
   outer_space_Y = (outer_space_Y < min_space) ? min_space : outer_space_Y;
-  int posy = x / 2;
+  int posy = x / idsperline;
+  
   posy =
       pageHeight - (outer_space_Y + (posy + 1) * height + posy * inner_space_Y);
-  int posx = x % 2 == 0 ? outer_space_X : width + outer_space_X + inner_space_X;
+  int posx = x % idsperline;
+  posx = outer_space_X + posx * (width + inner_space_X);
 
   HPDF_Page_SetLineWidth(page, 0);
-
   drawImages(pdf, posx, posy, width, height, x, extra[1]);
 
   /* Draw Rectangle */
@@ -264,12 +312,14 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
 
   draw_rect(page, posx, posy + height - groupspace, width, groupspace);
   HPDF_Page_FillStroke(page);
+  bool foto = false;
   switch (extra[0]) {
   case 0:
     break;
   default:
+    foto = true;
     drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34,
-                  posy + height - 34, 18);
+                  posy + height - 30, 18);
     break;
   }
 
@@ -277,16 +327,17 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   if (strcmp(name, "\0") == 0) {
     HPDF_Page_SetFontAndSize(page, fontbd, 24);
     HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
-    text(page, posx + width / 2 - sizeof(group) * lettersize * 0.85,
-         posy + height - 15, group);
+    printf("Group: %s\n", group);
+    text(page, posx + width / 2 - sizeof(group) * lettersize,
+         posy + height - 11, group);
     return;
   }
-  HPDF_Page_SetFontAndSize(page, fontbd, 35);
+  HPDF_Page_SetFontAndSize(page, fontbd, 80/idsperline);
   if (strlen(name) > 9) {
-    HPDF_Page_SetFontAndSize(page, fontbd, 32);
+    HPDF_Page_SetFontAndSize(page, fontbd, 65/idsperline);
   }
   if (strlen(name) > 12) {
-    HPDF_Page_SetFontAndSize(page, fontbd, 28);
+    HPDF_Page_SetFontAndSize(page, fontbd, 45/idsperline);
   }
 
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
@@ -299,24 +350,24 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
 
   text(page, posx + lettersize * 2, posy + yoffset1line * 1.05, name);
-  HPDF_Page_SetFontAndSize(page, fontbd, 18);
+  HPDF_Page_SetFontAndSize(page, fontbd, 36/idsperline);
   if (strlen(add_name) > 20) {
-    HPDF_Page_SetFontAndSize(page, fontbd, 16);
+    HPDF_Page_SetFontAndSize(page, fontbd, 32/idsperline);
   }
   if (strlen(add_name) > 28) {
-    HPDF_Page_SetFontAndSize(page, fontbd, 12);
+    HPDF_Page_SetFontAndSize(page, fontbd, 24/idsperline);
   }
   text(page, posx + lettersize * 2, posy + yoffset1line - yoffset2line,
        add_name);
   HPDF_Page_SetFontAndSize(page, fontbd, 24);
   HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
-  text(page, posx + width / 2 - sizeof(group) * lettersize * 0.85,
-       posy + height - 15, group);
+  text(page, posx + width / 2 - sizeof(group) * lettersize, posy + height - 11,
+       group);
 }
 
 int main(int argc, char const *argv[]) {
   // const char *page_title = "Ausweise";
-
+  images = malloc(0);
   HPDF_Doc pdf;
   const char *font_name_bold;
   const char *font_name;
@@ -420,14 +471,10 @@ int main(int argc, char const *argv[]) {
     for (int i = 0; i < 2; i++) {
       printf("Extra %d:%s\n", i, extra);
       if (extra == NULL) {
+        extra = strtok(NULL, ":");
         continue;
       }
-      if (extra[0] == '0' || extra[0] == '2' || extra[0] == 'N' ||
-          extra[0] == 'n' || extra[0] == 'F' || extra[0] == 'f') {
-        extraatts[0] = 0;
-      } else if (extra[0] == '3' || extra[0] == 'E' || extra[0] == 'e') {
-        extraatts[1] = 1;
-      }
+      extraatts[i] = atoi(extra);
       extra = strtok(NULL, ":");
     }
     fflush(stdout);
@@ -439,7 +486,7 @@ int main(int argc, char const *argv[]) {
       page = HPDF_AddPage(pdf);
     }
   }
-  int extraatts[2] = {-1, -1};
+  int extraatts[2] = {-1, 0};
   for (int z = 0; z < min_fill_templates; z++) {
     // printf("Name: %s", line);
     drawIdentity(x++ % ids_per_page, "\0", "\0", group_name, page, font,
@@ -465,12 +512,13 @@ int main(int argc, char const *argv[]) {
     fclose(file);
   }
   HPDF_SaveToFile(pdf, fname);
-  free(fname);
   free(filepath);
   HPDF_Free(pdf);
-
   free(color);
   free(group_name);
-
+  for (int i = 0; i < imagecount; i++) {
+    free(images[i]->filename);
+    free(images[i]);
+  }
   return 0;
 }
