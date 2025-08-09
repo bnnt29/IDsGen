@@ -231,25 +231,25 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
     drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
     drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
     drawpng_image(pdf, "resources/Zukunftsstadt/Einhorn.png", posx + width - 80,
-                  posy + 20, 7);
+                  posy + 20, 8);
     break;
   case 2:
     /*drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 60,
                   posy + 30, 9);*/
-    drawjpg_image(pdf, "resources/Boysnight/wappen.jpg", posx + width - 90,
-                  posy + 60, 4);
+    drawjpg_image(pdf, "resources/Boysnight/wappen.jpg", posx + width - 100,
+                  posy + 55, 4.8);
     break;
     case 3:
     drawjpg_image(pdf, "resources/Boysnight/wizards-hat.jpg", posx + width - 90,
-                  posy + 60, 6);
-    drawjpg_image(pdf, "resources/Boysnight/sticker1.jpg", posx + 10,
-                  posy + 5, 3.5);
-    drawjpg_image(pdf, "resources/Boysnight/sticker2.jpg", posx + 80,
-                  posy + 5, 4);
-    drawjpg_image(pdf, "resources/Boysnight/sticker3.jpg", posx + 145,
-                  posy + 5, 4.5);
-    drawjpg_image(pdf, "resources/Boysnight/sticker4.jpg", posx + 200,
-                  posy + 5, 5);
+                  posy + 65, 8);
+    drawjpg_image(pdf, "resources/Boysnight/sticker1.jpg", posx + 14.5,
+                  posy + 5, 4.95);
+    drawjpg_image(pdf, "resources/Boysnight/sticker2.jpg", posx + 71,
+                  posy + 5, 4.95);
+    drawjpg_image(pdf, "resources/Boysnight/sticker3.jpg", posx + 128.5,
+                  posy + 5, 4.95);
+    drawjpg_image(pdf, "resources/Boysnight/sticker4.jpg", posx + 186,
+                  posy + 5, 4.95);
     break;
   default:
     drawjpg_image(pdf, "resources/Zukunftsstadt/Beton.jpg", posx, posy, 45);
@@ -325,7 +325,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   HPDF_Page_SetRGBStroke(page, 0, 0, 0);
   HPDF_Page_SetRGBFill(page, color[0], color[1], color[2]);
 
-  draw_rect(page, posx, posy, width, height);
+  draw_rect(page, posx, posy, width*0.93, height*0.88);
   HPDF_Page_Stroke(page);
   /*
   draw_rect(page, posx, posy, width, groupspace);
@@ -346,13 +346,13 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   }
 */
   int ws = 4;
-  int distance = 65;
-  int size = 30;
+  int size = 19.8;
+  int distance = (width-size*ws) / (ws + 1)+size;
   for (int i = 0; i < ws && extra[1]==2; i++)
   {
     HPDF_Page_SetLineWidth(page, 2);
     HPDF_Page_SetRGBFill(page, 1, 1, 1);
-    HPDF_Page_Circle(page, posx + (i+1) * distance-distance/3, posy + 40, size - i*4);
+    HPDF_Page_Circle(page, posx + i * distance+size+distance/2.75, posy + 30, size);
     HPDF_Page_FillStroke(page);
   }
   HPDF_Page_SetLineWidth(page, 0);
@@ -383,14 +383,14 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
 
   text(page, posx + lettersize * 2, posy + yoffset1line * 1.32+12, name);
-  HPDF_Page_SetFontAndSize(page, fontbd, (60-((int)strlen(add_name))*3)/idsperline);
+  HPDF_Page_SetFontAndSize(page, fontbd, (55-((int)strlen(add_name))*2)/idsperline);
   /*if (strlen(add_name) > 20) {
     HPDF_Page_SetFontAndSize(page, fontbd, 34/idsperline);
   }
   if (strlen(add_name) > 28) {
     HPDF_Page_SetFontAndSize(page, fontbd, 25/idsperline);
   }*/
-  text(page, posx + lettersize * 2+1, posy + yoffset1line + yoffset2line-6,
+  text(page, posx + lettersize * 2+1, posy + yoffset1line + yoffset2line-12,
        add_name);
   HPDF_Page_SetFontAndSize(page, fontbd, 24);
   HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
@@ -519,7 +519,7 @@ int main(int argc, char const *argv[]) {
       page = HPDF_AddPage(pdf);
     }
   }
-  int extraatts[2] = {-1, 0};
+  int extraatts[2] = {-1, 2};
   for (int z = 0; z < min_fill_templates; z++) {
     // printf("Name: %s", line);
     /*drawIdentity(x++ % ids_per_page, "\0", "\0", group_name, page, font,
@@ -530,13 +530,13 @@ int main(int argc, char const *argv[]) {
   }
   if (FILL_REMAINING_PAGE) {
     if (x % ids_per_page == 0) {
-      /*drawIdentity(x++ % ids_per_page, "\0", "\0", group_name, page, font,
+      drawIdentity(x++ % ids_per_page, "\0", "\0", group_name, page, font,
                    font_bold, pdf, color, extraatts);
     }
     for (x = x; x % ids_per_page != 0; x++) {
       // printf("Name: %s", line);
-      /*drawIdentity(x % ids_per_page, "\0", "\0", group_name, page, font,
-                   font_bold, pdf, color, extraatts);*/
+      drawIdentity(x % ids_per_page, "\0", "\0", group_name, page, font,
+                   font_bold, pdf, color, extraatts);
     }
   }
   // Close the file when done with it
