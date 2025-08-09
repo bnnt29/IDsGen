@@ -55,5 +55,8 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "cmake.sourceDirectory": "/mnt/files/Projekte/programming/finished/Kinderstadt/Kinderstadt Ausweis Befüller/libharu-2.4.4"
+  "cmake.sourceDirectory": "/mnt/files/Projekte/programming/finished/Kinderstadt/Kinderstadt Ausweis Befüller/libharu-2.4.4",
+  "files.associations": {
+    "setjmp.h": "c"
+  }
 }
