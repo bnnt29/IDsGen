@@ -67,6 +67,40 @@ void draw_image(HPDF_Doc pdf, const HPDF_Image image, float x, float y,
                       HPDF_Image_GetHeight(image) / scale);
 }
 
+typedef struct Image {
+  char *filename;
+  HPDF_Image image;
+} Image;
+int imagecount = 0;
+Image **images = NULL;
+
+void find_or_load_image(const char *filename, HPDF_Image* image, HPDF_Doc pdf, HPDF_Image (*f)(HPDF_Doc, const char*)) {
+  char *filename1 = malloc((strlen(filename) + 4) * sizeof(char));
+  strcpy(filename1, "");
+  strcat(filename1, "./");
+  strcat(filename1, filename);
+  strcat(filename1, "\0");
+  bool found = false;
+  for (int i = 0; i < imagecount; i++) {
+    if (strcmp(images[i]->filename, filename1) == 0) {
+      *image = images[i]->image;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    *image = f(pdf, filename1);
+    images = (Image **)realloc(images, imagecount * sizeof(Image*));
+    Image *im = malloc(sizeof(Image));
+    im -> filename = malloc((strlen(filename1) + 1) * sizeof(char));
+    strcpy(im -> filename, filename1);
+    im -> image = *image;
+    images[imagecount] = im;
+    imagecount++;
+  }
+  free(filename1);
+}
+
 void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y,
                    float scale) {
 #ifdef __WIN32__
@@ -74,21 +108,13 @@ void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y,
 #else
   const char *FILE_SEPARATOR = "./";
 #endif
-  char *filename1 = malloc((strlen(filename) + 4) * sizeof(char));
 
-  HPDF_Image image;
+  HPDF_Image image = NULL;
 
-  strcpy(filename1, "");
-  strcat(filename1, FILE_SEPARATOR);
-  strcat(filename1, filename);
-  strcat(filename1, "\0");
-
-  image = HPDF_LoadJpegImageFromFile(pdf, filename1);
+  find_or_load_image(filename, &image, pdf, HPDF_LoadJpegImageFromFile);
 
   /* Draw image to the canvas. */
   draw_image(pdf, image, x, y, scale);
-
-  free(filename1);
 }
 
 void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y,
@@ -98,21 +124,13 @@ void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y,
 #else
   const char *FILE_SEPARATOR = "./";
 #endif
-  char *filename1 = malloc((strlen(filename) + 4) * sizeof(char));
 
-  HPDF_Image image;
+  HPDF_Image image = NULL;
 
-  strcpy(filename1, "");
-  strcat(filename1, FILE_SEPARATOR);
-  strcat(filename1, filename);
-  strcat(filename1, "\0");
-
-  image = HPDF_LoadPngImageFromFile(pdf, filename1);
-
+  find_or_load_image(filename, &image, pdf, HPDF_LoadPngImageFromFile);
   /* Draw image to the canvas. */
   draw_image(pdf, image, x, y, scale);
-
-  free(filename1);
+  
 }
 
 void text(HPDF_Page page, float posx, float posy, const char *label) {
@@ -180,19 +198,19 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, int width, int height,
   /* Draw Image */
   switch (value) {
   case 1:
-    drawpng_image(pdf, "resources/Auto.png", posx + 4, posy + 30, 7.5);
-    drawpng_image(pdf, "resources/Auto.png", posx + width - 75, posy + 30, 7.5);
-    break;
-  case 2:
-    drawpng_image(pdf, "resources/Rakete.png", posx + 10, posy + 15, 7);
-    drawpng_image(pdf, "resources/Rakete.png", posx + width - 60, posy + 15, 7);
-    break;
-  case 5:
-    drawpng_image(pdf, "resources/Astronaut2.png", posx + 5, posy + 30, 5);
-    drawpng_image(pdf, "resources/Astronaut2.png", posx + width - 70, posy + 30,
-                  5);
+    drawpng_image(pdf, "resources/hand2.png", posx, posy-1, 6.25);
+    drawpng_image(pdf, "resources/hand1.png", posx + width - 81, posy-3, 6.25);
     break;
   case 10:
+    drawpng_image(pdf, "resources/taube.png", posx, posy + 25, 10);
+    drawpng_image(pdf, "resources/taube.png", posx + width - 75, posy + 25, 10);
+    break;
+  case 2:
+    drawpng_image(pdf, "resources/blume1.png", posx+5, posy+30, 4);
+    drawpng_image(pdf, "resources/blume1.png", posx + width - 70, posy+30,
+                  4);
+    break;
+  case 5:
     drawpng_image(pdf, "resources/Einhorn.png", posx + 5, posy + 25, 8);
     drawpng_image(pdf, "resources/Einhorn.png", posx + width - 65, posy + 25,
                   8);
@@ -247,9 +265,7 @@ void drawmoney(int x, char *name, int value, HPDF_Page page, HPDF_Font font,
 
   draw_rect(page, posx, posy, width, height);
   HPDF_Page_Stroke(page);
-
   drawImages(pdf, posx, posy, width, height, value);
-
   /*Text*/
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
   char *valbuf = (char *)malloc(10 * sizeof(char));
@@ -259,8 +275,8 @@ void drawmoney(int x, char *name, int value, HPDF_Page page, HPDF_Font font,
   case 2:
   case 5:
   case 10:
-    HPDF_Page_SetFontAndSize(page, fontbd, 30);
-    text(page, posx + width / 2 - lettersize * 1.7,
+    HPDF_Page_SetFontAndSize(page, fontbd, 40);
+    text(page, posx + width / 2 - lettersize * 1.85 * (strlen(valbuf)),
          posy + width / 2 - lettersize * 5, valbuf);
     HPDF_Page_SetFontAndSize(page, fontbd, 20);
     text(page,
@@ -274,8 +290,10 @@ void drawmoney(int x, char *name, int value, HPDF_Page page, HPDF_Font font,
 
     text(page, posx + width / 2 - lettersize * sizeof(value_str) / sizeof(char),
          posy + lettersize * 2, value_str);
+    free(value_str);
     break;
   }
+  free(valbuf);
 }
 
 int main(int argc, char const *argv[]) {
@@ -316,7 +334,6 @@ int main(int argc, char const *argv[]) {
   HPDF_UseUTFEncodings(pdf);
   setlocale(LC_ALL, "");
   HPDF_SetCompressionMode(pdf, HPDF_COMP_ALL);
-
   // Load fonts
   font_name = HPDF_LoadTTFontFromFile(pdf, "resources/arial.ttf", HPDF_TRUE);
   font = HPDF_GetFont(pdf, font_name, "UTF-8");
@@ -324,16 +341,17 @@ int main(int argc, char const *argv[]) {
   font_name_bold =
       HPDF_LoadTTFontFromFile(pdf, "resources/arialbd.ttf", HPDF_TRUE);
   font_bold = HPDF_GetFont(pdf, font_name_bold, "UTF-8");
-
+  printf("%d\n", 1);
   char *lastname = malloc(100 * sizeof(char));
-  int x;
+  int x = 0;
   int lastvalue = 0;
-  for (int i = 2; i < argc; i += 3) {
+    for (int i = 2; i < argc; i += 3) {
     strcpy(lastname, argv[i]);
     for (int j = 0; j < atoi(argv[i + 1]); j++) {
       lastvalue = atoi(argv[i + 2]);
+      printf("%d %d %d\n", i, j, lastvalue);
       drawmoney(x++, lastname, lastvalue, page, font, font_bold, pdf);
-      if (x % ids_per_page == 0 && j < atoi(argv[i]) - 1) {
+      if (x % ids_per_page == 0 && (j < atoi(argv[i]) - 1 || i + 3 < argc)) {
         page = HPDF_AddPage(pdf);
       }
     }
@@ -345,11 +363,15 @@ int main(int argc, char const *argv[]) {
       drawmoney(x, lastname, lastvalue, page, font, font_bold, pdf);
     }
   }
-  // Close the file when done with it
-
   HPDF_SaveToFile(pdf, fname);
+  free(lastname);
   free(fname);
   free(filepath);
   HPDF_Free(pdf);
+  for (int i = 0; i < imagecount; i++) {
+    free(images[i]->filename);
+    free(images[i]->image);
+  }
+  free(images);
   return 0;
 }
