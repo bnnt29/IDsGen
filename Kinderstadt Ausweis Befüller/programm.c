@@ -114,7 +114,6 @@ void drawjpg_image(HPDF_Doc pdf, const char *filename, float x, float y,
 
   /* Draw image to the canvas. */
   draw_image(pdf, image, x, y, scale);
-
   free(filename1);
 }
 
@@ -128,7 +127,7 @@ void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y,
   char *filename1 = malloc((strlen(filename) + 4) * sizeof(char));
 
   HPDF_Image image = NULL;
-
+  
   strcpy(filename1, "");
   strcat(filename1, FILE_SEPARATOR);
   strcat(filename1, filename);
@@ -150,6 +149,10 @@ void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y,
     im -> image = image;
     images[imagecount] = im;
     imagecount++;
+  }
+  if (image == NULL) {
+    printf("Error loading image %s\n", filename1);
+    return;
   }
   /* Draw image to the canvas. */
   draw_image(pdf, image, x, y, scale);
@@ -220,23 +223,32 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
                 int x, const int extra) {
   /* Draw Image */
   switch (extra) {
-  case 0:
-    drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 60,
+    default:
+    case 0:
+      /*drawpng_image(pdf, "resources/Kinderstadt/regenbogen.png", posx + width - 95,
+                    posy + 30, 8);*/
+    case 1:
+      /*drawpng_image(pdf, "resources/Kinderstadt/taube.png", posx + width - 95,
+                    posy, 6);*/
+    case 2:
+      drawpng_image(pdf, "resources/Kinderstadt/hand.png", posx + width - 90,
+                    posy-6, 5.60);
+      break;
+    case 3:
+      drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
+      drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
+      drawpng_image(pdf, "resources/Zukunftsstadt/Einhorn.png", posx + width - 80,
+                    posy + 15, 7);
+      break;
+  /*case 0:
+    drawpng_image(pdf, "resources/Kinderstadt/regenbogen.png", posx + width - 60,
                   posy + 30, 9);
-    /*drawpng_image(pdf, "resources/Boysnight/zahn.png", posx + width - 140,
-                    posy + 75, 12);*/
     break;
-  case 1:
-
-    drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
-    drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
-    drawpng_image(pdf, "resources/Zukunftsstadt/Einhorn.png", posx + width - 80,
-                  posy + 20, 8);
-    break;
+  
   case 2:
     /*drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 60,
                   posy + 30, 9);*/
-    drawjpg_image(pdf, "resources/Boysnight/wappen.jpg", posx + width - 100,
+    /*drawjpg_image(pdf, "resources/Boysnight/wappen.jpg", posx + width - 100,
                   posy + 55, 4.8);
     break;
     case 3:
@@ -271,7 +283,7 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
                   posy, 45);
     drawpng_image(pdf, "resources/Zukunftsstadt/Stadt.png", posx + width - 90,
                   posy + 30, 3.5);
-    break;
+    break;/*/
   }
 }
 
@@ -325,27 +337,30 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   HPDF_Page_SetRGBStroke(page, 0, 0, 0);
   HPDF_Page_SetRGBFill(page, color[0], color[1], color[2]);
 
-  draw_rect(page, posx, posy, width*0.93, height*0.88);
+  draw_rect(page, posx, posy, width, height);
   HPDF_Page_Stroke(page);
-  /*
-  draw_rect(page, posx, posy, width, groupspace);
+
+  draw_rect(page, posx, posy + height - groupspace, width, groupspace); 
+
+  //draw_rect(page, posx, posy, width, groupspace);
   HPDF_Page_FillStroke(page);
 
-  HPDF_Page_SetRGBFill(page, 0, 0, 0);
-  HPDF_Page_Circle(page, posx + width / 2, posy + height - 10, 2);
-  HPDF_Page_FillStroke(page);
-  bool foto = false;
-  switch (extra[0]) {
-  case 0:
-    break;
-  default:
-    foto = true;
-    drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34,
-                  posy-2, 18);
-    break;
-  }
-*/
-  int ws = 4;
+  //HPDF_Page_SetRGBFill(page, 0, 0, 0);
+  //HPDF_Page_Circle(page, posx + width / 2, posy + height - 10, 2);
+  //HPDF_Page_FillStroke(page);
+  
+  bool foto = false; 
+  switch (extra[0]) { 
+  case 0: 
+    break; 
+  default: 
+    foto = true; 
+    drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34, 
+                  posy+height-34, 18); 
+    break; 
+  } 
+
+  /*int ws = 4;
   int size = 19.8;
   int distance = (width-size*ws) / (ws + 1)+size;
   for (int i = 0; i < ws && extra[1]==2; i++)
@@ -354,24 +369,24 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
     HPDF_Page_SetRGBFill(page, 1, 1, 1);
     HPDF_Page_Circle(page, posx + i * distance+size+distance/2.75, posy + 30, size);
     HPDF_Page_FillStroke(page);
-  }
-  HPDF_Page_SetLineWidth(page, 0);
+  }*/
+  //HPDF_Page_SetLineWidth(page, 0);
   /*Text*/
   if (strcmp(name, "\0") == 0) {
-    HPDF_Page_SetFontAndSize(page, fontbd, (55-((int)strlen(group))*3));
+    HPDF_Page_SetFontAndSize(page, fontbd, 24);
     HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
     printf("Group: %s\n", group);
-    /*text(page, posx + width / 2 - sizeof(group) * lettersize,
-         posy + 15, group);*/
+    text(page, posx + width / 2 - sizeof(group) * lettersize,
+         posy + height - 11, group);
     return;
   }
-  HPDF_Page_SetFontAndSize(page, fontbd, (95-((int)strlen(name))*3)/idsperline);
-  /*if (strlen(name) >= 9) {
-    HPDF_Page_SetFontAndSize(page, fontbd, 70/idsperline);
+  HPDF_Page_SetFontAndSize(page, fontbd, (97-((int)strlen(name))*3)/idsperline);
+  if (strlen(name) >= 8) {
+    HPDF_Page_SetFontAndSize(page, fontbd, 67/idsperline);
   }
   if (strlen(name) >= 12) {
     HPDF_Page_SetFontAndSize(page, fontbd, 57/idsperline);
-  }*/
+  }
 
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
 
@@ -382,20 +397,20 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
 
   HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
 
-  text(page, posx + lettersize * 2, posy + yoffset1line * 1.32+12, name);
+  text(page, posx + lettersize * 2, posy + yoffset1line * 1.05, name);
   HPDF_Page_SetFontAndSize(page, fontbd, (55-((int)strlen(add_name))*2)/idsperline);
-  /*if (strlen(add_name) > 20) {
+  if (strlen(add_name) > 20) {
     HPDF_Page_SetFontAndSize(page, fontbd, 34/idsperline);
   }
   if (strlen(add_name) > 28) {
     HPDF_Page_SetFontAndSize(page, fontbd, 25/idsperline);
-  }*/
-  text(page, posx + lettersize * 2+1, posy + yoffset1line + yoffset2line-12,
+  }
+  text(page, posx + lettersize * 2+1, posy + yoffset1line - yoffset2line,
        add_name);
   HPDF_Page_SetFontAndSize(page, fontbd, 24);
   HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
-  /*text(page, posx + width / 2 - sizeof(group) * lettersize, posy + 15,
-       group);*/
+  text(page, posx + width / 2 - sizeof(group) * lettersize, posy + height - 15,
+       group);
 }
 
 int main(int argc, char const *argv[]) {
