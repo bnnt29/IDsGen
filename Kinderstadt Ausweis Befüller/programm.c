@@ -21,7 +21,7 @@ wchar_t OE = L'\u00d6';
 wchar_t AE = L'\u00c4';
 
 const bool FILL_REMAINING_PAGE = true;
-const int ids_per_page = 10;
+const int ids_per_page = 15;
 const int min_fill_templates = 5;
 
 void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no,
@@ -231,13 +231,13 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
       /*drawpng_image(pdf, "resources/Kinderstadt/taube.png", posx + width - 95,
                     posy, 6);*/
     case 2:
-      drawpng_image(pdf, "resources/Kinderstadt/hand.png", posx + width - 90,
+      drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 90,
                     posy-6, 5.60);
       break;
     case 3:
       drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
       drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
-      drawpng_image(pdf, "resources/Zukunftsstadt/Einhorn.png", posx + width - 80,
+      drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 80,
                     posy + 15, 7);
       break;
   /*case 0:
@@ -295,8 +295,8 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   int pageHeight = HPDF_Page_GetHeight(page);
   int pageWidth = HPDF_Page_GetWidth(page);
   double xwidth = 8.5;
-  double xtoy = 5.2 / xwidth;
-  int idsperline = 2;
+  double xtoy = 7.8 / xwidth;
+  int idsperline = 3;
   int idsperrow = ids_per_page / idsperline;
   double width = 534/idsperline;
   double lettersize = 6;
@@ -305,8 +305,8 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   double height = width * xtoy;
   double groupspace_xtoy = 1.2 / xwidth;
   double groupspace = width * groupspace_xtoy;
-  double outer_space_X = (pageWidth - (width * idsperline)) / (idsperline + 1);
-  double inner_space_X = outer_space_X / idsperline;
+  double outer_space_X = (pageWidth - width) / 2;
+  double inner_space_X = 0;//outer_space_X / idsperline;
   inner_space_X =
       (inner_space_X < min_inner_space) ? min_inner_space : inner_space_X;
   outer_space_X =
@@ -355,8 +355,8 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
     break; 
   default: 
     foto = true; 
-    drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34, 
-                  posy+height-34, 18); 
+    /*drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34, 
+                  posy+height-34, 18);*/ 
     break; 
   } 
 
