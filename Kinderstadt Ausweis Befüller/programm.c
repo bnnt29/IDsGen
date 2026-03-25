@@ -24,6 +24,15 @@ const bool FILL_REMAINING_PAGE = true;
 const int ids_per_page = 15;
 const int min_fill_templates = 5;
 
+char* replace_char(char* str, char find, char replace) {
+    char *current_pos = strchr(str, find);
+    while (current_pos) {
+        *current_pos = replace;
+        current_pos = strchr(current_pos + 1, find);
+    }
+    return str;
+}
+
 void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no,
                    void *user_data) {
   printf("ERROR: error_no=%04X, detail_no=%u\n", (HPDF_UINT)error_no,
@@ -231,14 +240,15 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
       /*drawpng_image(pdf, "resources/Kinderstadt/taube.png", posx + width - 95,
                     posy, 6);*/
     case 2:
-      drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 90,
-                    posy-6, 5.60);
+      /*drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 90,
+                    posy-6, 5.60);*/
       break;
     case 3:
-      drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
-      drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
+      drawpng_image(pdf, "resources/Boysnight/briefmarke_c.png", posx+width+width/3, posy+height/4, 6);
+      drawpng_image(pdf, "resources/Boysnight/briefmarke_c.png", posx+2*width+width/3, posy+height/4, 6);
+      /*drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
       drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 80,
-                    posy + 15, 7);
+                    posy + 15, 7);*/
       break;
   /*case 0:
     drawpng_image(pdf, "resources/Kinderstadt/regenbogen.png", posx + width - 60,
@@ -299,7 +309,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   int idsperline = 3;
   int idsperrow = ids_per_page / idsperline;
   double width = 534/idsperline;
-  double lettersize = 6;
+  double lettersize = 4;
   double min_space = 11;
   double min_inner_space = 4/idsperline;
   double height = width * xtoy;
@@ -339,26 +349,31 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
 
   draw_rect(page, posx, posy, width, height);
   HPDF_Page_Stroke(page);
-
-  draw_rect(page, posx, posy + height - groupspace, width, groupspace); 
-
-  //draw_rect(page, posx, posy, width, groupspace);
-  HPDF_Page_FillStroke(page);
+  if (x%3 == 0){
+    draw_rect(page, posx, posy, width, height); 
+    //draw_rect(page, posx, posy, width, groupspace);
+    HPDF_Page_FillStroke(page);
+      
+    bool foto = true; 
+    switch (extra[0]) { 
+    case 0: 
+      break; 
+    default: 
+      foto = true; 
+      drawpng_image(pdf, "resources/FotoMono.png", posx + width - 40, 
+                    posy+25, 15);
+      drawpng_image(pdf, "resources/gluten-freew.png", posx + width - 70, 
+                    posy+28, 16);
+                    
+      break; 
+    } 
+  }
+  
 
   //HPDF_Page_SetRGBFill(page, 0, 0, 0);
   //HPDF_Page_Circle(page, posx + width / 2, posy + height - 10, 2);
   //HPDF_Page_FillStroke(page);
-  
-  bool foto = false; 
-  switch (extra[0]) { 
-  case 0: 
-    break; 
-  default: 
-    foto = true; 
-    /*drawpng_image(pdf, "resources/FotoMono.png", posx + width - 34, 
-                  posy+height-34, 18);*/ 
-    break; 
-  } 
+
 
   /*int ws = 4;
   int size = 19.8;
@@ -374,7 +389,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   /*Text*/
   if (strcmp(name, "\0") == 0) {
     HPDF_Page_SetFontAndSize(page, fontbd, 24);
-    HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
+    HPDF_Page_SetRGBFill(page, 1.0,0.843,0);
     printf("Group: %s\n", group);
     text(page, posx + width / 2 - sizeof(group) * lettersize,
          posy + height - 11, group);
@@ -392,10 +407,10 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
 
   // int linelength = 9;
   // int maxlineexpand = 4;
-  int yoffset1line = (height - groupspace) / 2 + lettersize * 2;
-  int yoffset2line = (height - groupspace) / 5;
+  int yoffset1line = (groupspace) / 0.66 + lettersize;
+  int yoffset2line = (groupspace) / 1.66;
 
-  HPDF_Page_SetRGBFill(page, 0.0, 0.0, 0.0);
+  HPDF_Page_SetRGBFill(page, 1.0,0.843,0);
 
   text(page, posx + lettersize * 2, posy + yoffset1line * 1.05, name);
   HPDF_Page_SetFontAndSize(page, fontbd, (55-((int)strlen(add_name))*2)/idsperline);
@@ -407,10 +422,19 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   }
   text(page, posx + lettersize * 2+1, posy + yoffset1line - yoffset2line,
        add_name);
-  HPDF_Page_SetFontAndSize(page, fontbd, 24);
-  HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
-  text(page, posx + width / 2 - sizeof(group) * lettersize, posy + height - 15,
-       group);
+  HPDF_Page_SetFontAndSize(page, fontbd, 16);
+  HPDF_Page_SetRGBFill(page, 1.0,0.843,0);
+  group = replace_char(group, '-', ' ');
+  char delimiter[] = "_";
+  char * ptr = strtok(group, delimiter);
+  int i = 0;
+  while (ptr != NULL) {
+        text(page, posx + width / 2 - strlen(ptr) * lettersize-4, posy + height - 15 - i * lettersize * 4,
+       ptr);
+        // Folgeaufrufe mit NULL
+        ptr = strtok(NULL, delimiter);
+        i++;
+  }
 }
 
 int main(int argc, char const *argv[]) {
@@ -436,8 +460,10 @@ int main(int argc, char const *argv[]) {
   printf("output file : %s\n", fname);
 
   pdf = HPDF_New(error_handler, NULL);
-  page = HPDF_AddPage(pdf);
+  HPDF_SetCompressionMode (pdf, HPDF_COMP_ALL);
 
+  page = HPDF_AddPage(pdf);
+  
   if (!pdf) {
     printf("error: cannot create PdfDoc object\n");
     return 1;
