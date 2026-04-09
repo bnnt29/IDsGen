@@ -254,9 +254,9 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
       break;
     case 3:
       HPDF_Page_SetRGBFill(pdf->cur_page, 0.0, 0.0, 0.0);
-      rottext(pdf->cur_page, posx+50, posy+height-10, "Mein lieblings", 270.0);
-      rottext(pdf->cur_page, posx+30, posy+height-4, "Moment bei der", 270.0);
-      rottext(pdf->cur_page, posx+10, posy+height-25, "Boysnight", 270.0);
+      rottext(pdf->cur_page, posx+width-40, posy+46, "Mein lieblings", 90.0);
+      rottext(pdf->cur_page, posx+width-24, posy+42, "Moment bei der", 90.0);
+      rottext(pdf->cur_page, posx+width-8, posy+55, "Boysnight", 90.0);
       //drawpng_image(pdf, "resources/Boysnight/briefmarke_c.png", posx+width/2.5, posy+height/4, 6);
       /*drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
       drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 80,
@@ -379,7 +379,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
     } 
   }
   
-  HPDF_Page_SetFontAndSize(page, fontbd, 18);
+  HPDF_Page_SetFontAndSize(page, fontbd, 25/idsperline);
   drawImages(pdf, posx, posy, width, height, x, extra[1]);
   
 
