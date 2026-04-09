@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+#include <math.h>
 
 jmp_buf env;
 
@@ -21,8 +22,8 @@ wchar_t OE = L'\u00d6';
 wchar_t AE = L'\u00c4';
 
 const bool FILL_REMAINING_PAGE = true;
-const int ids_per_page = 15;
-const int min_fill_templates = 5;
+const int ids_per_page = 8;
+const int min_fill_templates = 0;
 
 char* replace_char(char* str, char find, char replace) {
     char *current_pos = strchr(str, find);
@@ -35,6 +36,7 @@ char* replace_char(char* str, char find, char replace) {
 
 void error_handler(HPDF_STATUS error_no, HPDF_STATUS detail_no,
                    void *user_data) {
+  (void)user_data;
   printf("ERROR: error_no=%04X, detail_no=%u\n", (HPDF_UINT)error_no,
          (HPDF_UINT)detail_no);
   longjmp(env, 1);
@@ -168,11 +170,18 @@ void drawpng_image(HPDF_Doc pdf, const char *filename, float x, float y,
   free(filename1);
 }
 
-void text(HPDF_Page page, float posx, float posy, const char *label) {
+void rottext(HPDF_Page page, float posx, float posy, const char *label, float angle) {
+  float rad1 = angle / 180 * 3.141592; /* Calculate the radian value. */
   HPDF_Page_BeginText(page);
-  HPDF_Page_MoveTextPos(page, posx, posy - 10);
+  HPDF_Page_SetTextMatrix (page, cos(rad1), sin(rad1), -sin(rad1), cos(rad1),
+                posx, posy - 10);
+  //HPDF_Page_MoveTextPos(page, posx, posy - 10);
   HPDF_Page_ShowText(page, label);
   HPDF_Page_EndText(page);
+}
+
+void text(HPDF_Page page, float posx, float posy, const char *label){
+  rottext(page, posx, posy, label, 0);
 }
 
 char *splitstr(int x, const char *txt, bool first) {
@@ -244,11 +253,17 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
                     posy-6, 5.60);*/
       break;
     case 3:
-      drawpng_image(pdf, "resources/Boysnight/briefmarke_c.png", posx+width+width/3, posy+height/4, 6);
-      drawpng_image(pdf, "resources/Boysnight/briefmarke_c.png", posx+2*width+width/3, posy+height/4, 6);
+      HPDF_Page_SetRGBFill(pdf->cur_page, 0.0, 0.0, 0.0);
+      rottext(pdf->cur_page, posx+50, posy+height-10, "Mein lieblings", 270.0);
+      rottext(pdf->cur_page, posx+30, posy+height-4, "Moment bei der", 270.0);
+      rottext(pdf->cur_page, posx+10, posy+height-25, "Boysnight", 270.0);
+      //drawpng_image(pdf, "resources/Boysnight/briefmarke_c.png", posx+width/2.5, posy+height/4, 6);
       /*drawjpg_image(pdf, "resources/Bild1.jpg", posx + width / 3 + 7, posy, 2.8);
       drawpng_image(pdf, "resources/Bild1.jpg", posx + width - 80,
                     posy + 15, 7);*/
+      break;
+    case 4:
+      drawpng_image(pdf, "resources/worldmap.png", posx+width/6, posy+height/8, 6);
       break;
   /*case 0:
     drawpng_image(pdf, "resources/Kinderstadt/regenbogen.png", posx + width - 60,
@@ -256,8 +271,8 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
     break;
   
   case 2:
-    /*drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 60,
-                  posy + 30, 9);*/
+    // drawjpg_image(pdf, "resources/Boysnight/uhr.jpeg", posx + width - 60,
+    //               posy + 30, 9);
     /*drawjpg_image(pdf, "resources/Boysnight/wappen.jpg", posx + width - 100,
                   posy + 55, 4.8);
     break;
@@ -305,18 +320,18 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   int pageHeight = HPDF_Page_GetHeight(page);
   int pageWidth = HPDF_Page_GetWidth(page);
   double xwidth = 8.5;
-  double xtoy = 7.8 / xwidth;
-  int idsperline = 3;
+  double xtoy = 5.2 / xwidth;
+  int idsperline = 2;
   int idsperrow = ids_per_page / idsperline;
-  double width = 534/idsperline;
-  double lettersize = 4;
+  double width = 530/idsperline;
+  double lettersize = 6;
   double min_space = 11;
   double min_inner_space = 4/idsperline;
   double height = width * xtoy;
   double groupspace_xtoy = 1.2 / xwidth;
   double groupspace = width * groupspace_xtoy;
-  double outer_space_X = (pageWidth - width) / 2;
-  double inner_space_X = 0;//outer_space_X / idsperline;
+  double outer_space_X = (pageWidth - (width * idsperline)) / (idsperline + 1);
+  double inner_space_X = outer_space_X / idsperline;
   inner_space_X =
       (inner_space_X < min_inner_space) ? min_inner_space : inner_space_X;
   outer_space_X =
@@ -327,6 +342,7 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   double inner_space_Y = outer_space_Y / 2;
   inner_space_Y =
       (inner_space_Y < min_inner_space) ? min_inner_space : inner_space_Y;
+  inner_space_Y = 0.0;
   outer_space_Y =
       ((pageHeight - (height * idsperrow)) - (idsperrow - 1) * inner_space_Y) /
       2;
@@ -339,27 +355,21 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   posx = outer_space_X + posx * (width + inner_space_X);
   
   HPDF_Page_SetLineWidth(page, 0);
-  drawImages(pdf, posx, posy, width, height, x, extra[1]);
                     
   /* Draw Rectangle */
   
   HPDF_Page_SetLineWidth(page, 0);
   HPDF_Page_SetRGBStroke(page, 0, 0, 0);
   HPDF_Page_SetRGBFill(page, color[0], color[1], color[2]);
-
-  draw_rect(page, posx, posy, width, height);
-  HPDF_Page_Stroke(page);
-  if (x%3 == 0){
+  if (x%1 == 0&&extra[1]<4) {
     draw_rect(page, posx, posy, width, height); 
     //draw_rect(page, posx, posy, width, groupspace);
     HPDF_Page_FillStroke(page);
       
-    bool foto = true; 
     switch (extra[0]) { 
     case 0: 
       break; 
     default: 
-      foto = true; 
       drawpng_image(pdf, "resources/FotoMono.png", posx + width - 40, 
                     posy+25, 15);
       drawpng_image(pdf, "resources/gluten-freew.png", posx + width - 70, 
@@ -368,6 +378,9 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
       break; 
     } 
   }
+  
+  HPDF_Page_SetFontAndSize(page, fontbd, 18);
+  drawImages(pdf, posx, posy, width, height, x, extra[1]);
   
 
   //HPDF_Page_SetRGBFill(page, 0, 0, 0);
@@ -388,13 +401,44 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   //HPDF_Page_SetLineWidth(page, 0);
   /*Text*/
   if (strcmp(name, "\0") == 0) {
-    HPDF_Page_SetFontAndSize(page, fontbd, 24);
+    HPDF_Page_SetFontAndSize(page, fontbd, 15);
+    lettersize = 4;
     HPDF_Page_SetRGBFill(page, 1.0,0.843,0);
     printf("Group: %s\n", group);
-    text(page, posx + width / 2 - sizeof(group) * lettersize,
-         posy + height - 11, group);
+    char *group_copy = strdup(group);
+    if (group_copy == NULL) {
+      return;
+    }
+    replace_char(group_copy, '-', ' ');
+    char delimiter[] = "_";
+    char * ptr = strtok(group_copy, delimiter);
+    int i = 0;
+    while (ptr != NULL) {
+          if (strlen(ptr)<10){
+          HPDF_Page_SetFontAndSize(page, fontbd, 35);
+          lettersize = 11;
+          text(page, posx + width / 2 - strlen(ptr) * lettersize-3.25, posy + height - 25 - i * lettersize * 3.25,
+       ptr);
+          } else if (strlen(ptr)<20){
+            lettersize = 4;
+            HPDF_Page_SetFontAndSize(page, fontbd, 15);
+            text(page, posx + width / 2 - strlen(ptr) * lettersize-3.25, posy + height - 15 - i * lettersize * 3.25,
+       ptr);
+          } else {
+              lettersize = 3;
+            HPDF_Page_SetFontAndSize(page, fontbd, 12);
+            text(page, posx + width / 2 - strlen(ptr) * lettersize-3.25, posy + height - 15 - i * lettersize * 3.25,
+       ptr);
+        }
+          // Folgeaufrufe mit NULL
+          ptr = strtok(NULL, delimiter);
+          i++;
+    }
+    free(group_copy);
     return;
   }
+  
+  lettersize = 6;
   HPDF_Page_SetFontAndSize(page, fontbd, (97-((int)strlen(name))*3)/idsperline);
   if (strlen(name) >= 8) {
     HPDF_Page_SetFontAndSize(page, fontbd, 67/idsperline);
@@ -422,19 +466,39 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
   }
   text(page, posx + lettersize * 2+1, posy + yoffset1line - yoffset2line,
        add_name);
-  HPDF_Page_SetFontAndSize(page, fontbd, 16);
+  lettersize = 4;
   HPDF_Page_SetRGBFill(page, 1.0,0.843,0);
-  group = replace_char(group, '-', ' ');
+  char *group_copy = strdup(group);
+  if (group_copy == NULL) {
+    return;
+  }
+  replace_char(group_copy, '-', ' ');
   char delimiter[] = "_";
-  char * ptr = strtok(group, delimiter);
+  char * ptr = strtok(group_copy, delimiter);
   int i = 0;
   while (ptr != NULL) {
-        text(page, posx + width / 2 - strlen(ptr) * lettersize-4, posy + height - 15 - i * lettersize * 4,
+        if (strlen(ptr)<10){
+          HPDF_Page_SetFontAndSize(page, fontbd, 35);
+          lettersize = 11;
+          text(page, posx + width / 2 - strlen(ptr) * lettersize-3.25, posy + height - 25 - i * lettersize * 3.25,
        ptr);
+          } else if (strlen(ptr)<20){
+            lettersize = 4;
+            HPDF_Page_SetFontAndSize(page, fontbd, 15);
+            text(page, posx + width / 2 - strlen(ptr) * lettersize-3.25, posy + height - 15 - i * lettersize * 3.25,
+       ptr);
+          } else {
+              lettersize = 3;
+            HPDF_Page_SetFontAndSize(page, fontbd, 12);
+            text(page, posx + width / 2 - strlen(ptr) * lettersize-3.25, posy + height - 15 - i * lettersize * 3.25,
+       ptr);
+        }
+        
         // Folgeaufrufe mit NULL
         ptr = strtok(NULL, delimiter);
         i++;
   }
+  free(group_copy);
 }
 
 int main(int argc, char const *argv[]) {
