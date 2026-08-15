@@ -231,8 +231,8 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
       /*drawpng_image(pdf, "resources/Kinderstadt/taube.png", posx + width - 95,
                     posy, 6);*/
     case 2:
-      drawpng_image(pdf, "resources/Kinderstadt/hand.png", posx + width - 90,
-                    posy-6, 5.60);
+      drawpng_image(pdf, "resources/Boysnight/submarine.png", posx + width - 100,
+                    posy+20, 5.60);
       break;
     case 3:
       drawjpg_image(pdf, "resources/Bild1.jpg", posx, posy, 2.8);
@@ -285,6 +285,15 @@ void drawImages(HPDF_Doc pdf, int posx, int posy, double width, double height,
                   posy + 30, 3.5);
     break;/*/
   }
+}
+
+char* replace_char(char* str, char find, char replace) {
+    char *current_pos = strchr(str, find);
+    while (current_pos) {
+        *current_pos = replace;
+        current_pos = strchr(current_pos + 1, find);
+    }
+    return str;
 }
 
 void drawIdentity(int x, char *name, char *add_name, const char *group,
@@ -376,8 +385,28 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
     HPDF_Page_SetFontAndSize(page, fontbd, 24);
     HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
     printf("Group: %s\n", group);
-    text(page, posx + width / 2 - sizeof(group) * lettersize,
-         posy + height - 11, group);
+    char *group_copy = strdup(group);
+    if (group_copy == NULL) {
+      return;
+    }
+    replace_char(group_copy, '_', ' ');
+    if (strlen(group_copy)<10){
+      HPDF_Page_SetFontAndSize(page, fontbd, 35);
+      lettersize = 11;
+      text(page, posx + width / 2 - strlen(group_copy) * lettersize-3.25, posy + height - 25 - 0 * lettersize * 3.25,
+    group_copy);
+      } else if (strlen(group_copy)<20){
+        lettersize = 4;
+        HPDF_Page_SetFontAndSize(page, fontbd, 15);
+        text(page, posx + width / 2 - strlen(group_copy) * lettersize-3.25, posy + height - 15 - 0 * lettersize * 3.25,
+    group_copy);
+      } else {
+          lettersize = 3;
+        HPDF_Page_SetFontAndSize(page, fontbd, 12);
+        text(page, posx + width / 2 - strlen(group_copy) * lettersize-3.25, posy + height - 15 - 0 * lettersize * 3.25,
+    group_copy);
+    }
+    free(group_copy);
     return;
   }
   HPDF_Page_SetFontAndSize(page, fontbd, (97-((int)strlen(name))*3)/idsperline);
@@ -409,8 +438,28 @@ void drawIdentity(int x, char *name, char *add_name, const char *group,
        add_name);
   HPDF_Page_SetFontAndSize(page, fontbd, 24);
   HPDF_Page_SetRGBFill(page, 1.0, 1.0, 1.0);
-  text(page, posx + width / 2 - sizeof(group) * lettersize, posy + height - 15,
-       group);
+  char *group_copy = strdup(group);
+  if (group_copy == NULL) {
+    return;
+  }
+  replace_char(group_copy, '_', ' ');
+  if (strlen(group_copy)<10){
+    HPDF_Page_SetFontAndSize(page, fontbd, 35);
+    lettersize = 11;
+    text(page, posx + width / 2 - strlen(group_copy) * lettersize-3.25, posy + height - 25 - 0 * lettersize * 3.25,
+  group_copy);
+    } else if (strlen(group_copy)<20){
+      lettersize = 4;
+      HPDF_Page_SetFontAndSize(page, fontbd, 15);
+      text(page, posx + width / 2 - strlen(group_copy) * lettersize-3.25, posy + height - 15 - 0 * lettersize * 3.25,
+  group_copy);
+    } else {
+        lettersize = 3;
+      HPDF_Page_SetFontAndSize(page, fontbd, 12);
+      text(page, posx + width / 2 - strlen(group_copy) * lettersize-3.25, posy + height - 15 - 0 * lettersize * 3.25,
+  group_copy);
+  }
+  free(group_copy);
 }
 
 int main(int argc, char const *argv[]) {
